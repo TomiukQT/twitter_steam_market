@@ -1,7 +1,13 @@
 import requests
 import os
-from csgo_item import CSGOItem
+
 from common import get_nested
+from tqdm import tqdm
+
+try:
+    from .csgo_item import CSGOItem  # "myapp" case
+except:
+    from csgo_item import CSGOItem  # "__main__" case
 
 curAbbrev = {
     'USD': 1,
@@ -47,9 +53,9 @@ def get_item(appid, name, currency='EUR'):
     return market_item.json()
 
 
-def get_item_listing(appid: int, name: str, currency: str = 'EUR') -> []:
+def get_csgo_item_listing(name: str, currency: str = 'EUR') -> []:
     r"""
-        Function inspired from: https://github.com/MatyiFKBT/PySteamMarket
+        Function inspired fom: https://github.com/MatyiFKBT/PySteamMarket
         Gets item price history from the `Steam Marketplace`.
         @appid ID of game item belongs to.
         @name: Name of item to lookup.
@@ -69,7 +75,7 @@ def get_item_listing(appid: int, name: str, currency: str = 'EUR') -> []:
         #float: 'https://api.csgofloat.com/?m=4022305850956692180&a=27771119298&d=9971090550885451765'
         # https://api.csgofloat.com/?m=3136147247424375927&a=19190892996&d=9387202219111148413
         """
-    url = f'https://steamcommunity.com/market/listings/{appid}/{name}/render/'
+    url = f'https://steamcommunity.com/market/listings/730/{name}/render/'
     item_listing = requests.get(url, params={
         'query': '',
         'start': '0',
@@ -78,12 +84,13 @@ def get_item_listing(appid: int, name: str, currency: str = 'EUR') -> []:
         'language': 'english',
         'currency': curAbbrev[currency],
         'filter': '',
-        })
+    })
+    print(name)
     print(item_listing.url)
     item_listing_json = item_listing.json()
     item_listing_json.pop('results_html')
     item_listing_json.pop('hovers')
-    item_listing_json.pop('currecy')
+    item_listing_json.pop('currency')
     item_listing_json.pop('app_data')
 
     csgo_items = {}
@@ -92,14 +99,15 @@ def get_item_listing(appid: int, name: str, currency: str = 'EUR') -> []:
     assets = get_nested(item_listing_json, 'assets', '730', '2')
     for key in assets.keys():
         item_info = assets[key]
-        inspect_links[key] = get_nested(item_info, key, 'actions', '0', 'link')
+        inspect_links[key] = get_nested(item_info, 'actions', 0, 'link')
 
     listing_info = item_listing_json['listinginfo']
-    for key in listing_info.keys():
-        item_
-        csgo_items[key] = CSGOItem(key, listing_info[key]['asset']['id'])
+    for key in tqdm(listing_info.keys(), desc='Getting float from items'):
+        asset_id = listing_info[key]['asset']['id']
+        price = (listing_info[key]['converted_price'] + listing_info[key]['converted_fee']) / 100
+        inspect_link = get_nested(listing_info, key, 'asset', 'market_actions', 0, 'link')
+        print(inspect_link)
+        csgo_items[key] = CSGOItem(name, key, asset_id, price)
+        csgo_items[key].get_float(inspect_link)
 
-
-
-    return item_listing_json
-
+    return csgo_items

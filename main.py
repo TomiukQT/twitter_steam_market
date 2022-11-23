@@ -1,15 +1,16 @@
-import steammarket_new as sm
+import steam_market.steam_market as sm
 
-
-CSGO_ID = 730
 TEST_ITEM = 'AK-47 | Redline (Field-Tested)'
 TEST_ITEM2 = 'AK-47 | The Empress (Field-Tested)'
 
 
 def main():
-    item_info = sm.get_item_listing(CSGO_ID, TEST_ITEM2)
-    print(item_info)
+    csgo_items = sm.get_csgo_item_listing(TEST_ITEM2)
+    for item in csgo_items.values():
+        print(item)
+        break
 
 
 if __name__ == '__main__':
     main()
+

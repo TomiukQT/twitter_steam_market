@@ -1,0 +1,103 @@
+from typing import Tuple
+from steam_market import steam_market, csgo_item
+import tweepy
+import os
+import re
+import time
+
+
+class TwitterBot:
+    def __init__(self) -> None:
+        self.last_msg_id = 0
+        self.client = self.auth()
+
+    def auth(self) -> tweepy.Client:
+        """
+        Authenticate and create and  APIv2 client
+
+        Returns:
+        Authenticated client from tweepy
+        """
+
+        client = tweepy.Client(
+            consumer_key=os.getenv('TB_API_KEY'),
+            consumer_secret=os.getenv('TB_API_KEY_SECRET'),
+            access_token=os.getenv('TB_ACCESS_TOKEN'),
+            access_token_secret=os.getenv('TB_ACCESS_TOKEN_SECRET')
+        )
+        return client
+
+    def scan_messages(self) -> []:
+        """
+        Scan direct messages and make new query if new messages
+        Returns:
+            list of new messages
+        TODO: what if there are more than 100 messages??
+        """
+        messages = self.client.get_direct_message_events().data
+        new_messages = []
+        for msg in messages:
+            if msg.id == self.last_msg_id:
+                break
+            if re.fullmatch(r'^\d+ .+', str(msg)) is not None:
+                new_messages.append(str(msg))
+
+        else:
+            self.last_msg_id = msg.id
+        return new_messages
+
+    def process_new_messages(self, messages: []):
+        for message in messages:
+            print(message)
+            sender_id, query = '', ''
+            sender_id, query = self.parse_message(message)
+            try:
+               pass
+            except AttributeError:
+                print(f'Message {message} wasnt parsed')
+                continue
+
+            try:
+                items_info = steam_market.get_csgo_item_listing(query)
+                if len(items_info) == 0:
+                    self.client.create_direct_message(participant_id=sender_id,
+                                                      text='Query returned 0 items')
+                else:
+                    self.client.create_direct_message(participant_id=sender_id,
+                                                      text=f'Query returned {len(items_info)} items. First is {list(items_info.values())[0]}')
+                time.sleep(5)
+            except AttributeError:
+                self.client.create_direct_message(participant_id=sender_id, text='Wrong query or bot is temporarely banned on SteamAPI')
+
+
+
+
+
+
+
+    @staticmethod
+    def parse_message(message: str) -> Tuple[str, str]:
+        """
+
+        Args:
+            message: message to parse
+        TODO: Bad input solution
+        Returns: id of sender and query
+
+        """
+        sender_id = message.split(' ')[0]
+        query = message.replace(sender_id, '').strip()
+        return sender_id, query
+
+
+def main():
+    bot = TwitterBot()
+    messages = bot.scan_messages()
+    bot.process_new_messages(messages)
+
+
+    #client.create_direct_message(participant_id='4078139543', text="Ahoj y bota")
+
+
+if __name__ == '__main__':
+    main()
