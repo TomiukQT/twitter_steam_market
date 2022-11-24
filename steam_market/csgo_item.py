@@ -14,7 +14,7 @@ class CSGOItem:
         self.stickers = 'TBD'
 
     def get_float(self, link: str) -> None:
-        _,d = self.__parse_inspect_link(link)
+        _, d = self.__parse_inspect_link(link)
         url = 'https://api.csgofloat.com/'
         item_info = requests.get(url, params={
             'm': self.item_id,
