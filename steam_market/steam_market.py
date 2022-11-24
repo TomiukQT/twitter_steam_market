@@ -115,12 +115,44 @@ def get_csgo_item_listing(name: str, currency: str = 'EUR') -> []:
     return csgo_items
 
 
-def send_query(query: str):
-    params = parse_query(query)
-    csgo_items = get_csgo_item_listing(params['name'])
-    # filter items based on params
-    for x in csgo_items.copy():
-        if(x.float is not in range(params[]))
+def send_query(query: str) -> []:
+    """
+    TODO: Revamp stickers filtering.
+    Args:
+        query:
+
+    Returns:
+
+    """
+    print(query)
+    try:
+        params = parse_query(query)
+        csgo_items = get_csgo_item_listing(params['name'])
+        # filter items based on params
+        for item_id, item in csgo_items.copy().items():
+            float_low, float_high = params['float']
+            if not (float_low <= item.float <= float_high):
+                csgo_items.pop(item_id)
+                continue
+            stickers_count_low, stickers_count_high = params['stickers_count']
+            if not (stickers_count_low <= len(item.stickers) <= stickers_count_high):
+                csgo_items.pop(item_id)
+                continue
+            for sticker in params['stickers']:
+                for sticker_on_item in item.stickers:
+                    if sticker in sticker_on_item:
+                        break
+            else:
+                if len(params['stickers']) != 0:
+                    csgo_items.pop(item_id)
+                    continue
+        return csgo_items.values()
+    except NameError:
+        print('NameErr')
+        return []
+    except Exception:
+        print('Ex')
+        return []
 
 
 def parse_query(query: str) -> {}:
@@ -141,8 +173,7 @@ def parse_query(query: str) -> {}:
         'stickers': [],
         'stickers_count': (0, 1)
     }
-    split = query.split()
-    matches = re.findall(r'([a-z_]+){([a-z0-9,_ ]+)}', query)
+    matches = re.findall(r'([a-z_]+){([a-zA-Z0-9,_ ()|.-]+)}', query)
     for match in matches:
         key, value = match[0], match[1]
         if key not in params.keys():

@@ -8,8 +8,11 @@ import time
 
 class TwitterBot:
     def __init__(self) -> None:
-        self.last_msg_id = 0
+        self.last_msg_id = self.set_last_message()
         self.client = self.auth()
+
+    def set_last_message(self):
+        return int(open('last_message').read())
 
     def auth(self) -> tweepy.Client:
         """
@@ -50,24 +53,26 @@ class TwitterBot:
         for message in messages:
             print(message)
             sender_id, query = '', ''
-            sender_id, query = self.parse_message(message)
+
             try:
-               pass
+               sender_id, query = self.parse_message(message)
             except AttributeError:
                 print(f'Message {message} wasnt parsed')
                 continue
 
             try:
-                items_info = steam_market.get_csgo_item_listing(query)
-                if len(items_info) == 0:
-                    self.client.create_direct_message(participant_id=sender_id,
-                                                      text='Query returned 0 items')
+                items = steam_market.send_query(query)
+                if len(items) == 0:
+                    pass
+                    #self.client.create_direct_message(participant_id=sender_id,
+                                                      #text='Query returned 0 items')
                 else:
                     self.client.create_direct_message(participant_id=sender_id,
-                                                      text=f'Query returned {len(items_info)} items. First is {list(items_info.values())[0]}')
+                                                      text=f'Query returned {len(items)} items. First is {list(items)[0]}')
                 time.sleep(5)
             except AttributeError:
-                self.client.create_direct_message(participant_id=sender_id, text='Wrong query or bot is temporarely banned on SteamAPI')
+                print('Temp Wrong')
+                #self.client.create_direct_message(participant_id=sender_id, text='Wrong query or bot is temporarely banned on SteamAPI')
 
 
 
