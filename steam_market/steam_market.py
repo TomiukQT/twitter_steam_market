@@ -1,3 +1,5 @@
+import re
+
 import requests
 import os
 
@@ -111,3 +113,54 @@ def get_csgo_item_listing(name: str, currency: str = 'EUR') -> []:
         csgo_items[key].get_float(inspect_link)
 
     return csgo_items
+
+
+def send_query(query: str):
+    params = parse_query(query)
+    csgo_items = get_csgo_item_listing(params['name'])
+    # filter items based on params
+    for x in csgo_items.copy():
+        if(x.float is not in range(params[]))
+
+
+def parse_query(query: str) -> {}:
+    """
+    Parse query from user
+    Query params: param_name={param_value(s)}
+    Message template: name{skin_name} float{low,high} stickers{name or substring of sticker} stickers_count={low,high}
+    Message example: name{AK 47 | Redline (Field-Tested)} float{0.4,1} stickers{Katowice 2014} stickers_count={1}
+    Args:
+        query: query
+
+    Returns: dict of params if at least name provided else None
+
+    """
+    params = {
+        'name': '',
+        'float': (0, 1),
+        'stickers': [],
+        'stickers_count': (0, 1)
+    }
+    split = query.split()
+    matches = re.findall(r'([a-z_]+){([a-z0-9,_ ]+)}', query)
+    for match in matches:
+        key, value = match[0], match[1]
+        if key not in params.keys():
+            print(f'Unknown param {key}')
+            continue
+        params[key] = parse_param(key, value)
+    if params['name'] == '':
+        raise NameError('Name is missing') #TODO Change exception
+    return params
+
+
+def parse_param(key: str, value: str):
+    match key:
+        case 'name':
+            return value
+        case 'float' | 'stickers_count':
+            return tuple(map(lambda x: float(x), value.strip().split(',')))
+        case 'stickers':
+            return value.split(',')
+        case _:
+            return None
