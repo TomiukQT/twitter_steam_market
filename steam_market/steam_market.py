@@ -4,7 +4,6 @@ import requests
 import os
 
 from common import get_nested
-from tqdm import tqdm
 import time
 
 
@@ -96,7 +95,7 @@ def get_csgo_item_listing(name: str, currency: str = 'EUR') -> []:
         if not item_listing:
             break
         listing_info = item_listing.json()['listinginfo']
-        for key in tqdm(listing_info.keys(), desc='Getting items'):
+        for key in listing_info.keys():
             asset_id = listing_info[key]['asset']['id']
             price = (listing_info[key]['converted_price'] + listing_info[key]['converted_fee']) / 100
             inspect_link = get_nested(listing_info, key, 'asset', 'market_actions', 0, 'link')
@@ -116,7 +115,6 @@ def send_query(query: str) -> []:
     Returns:
 
     """
-    print(query)
     try:
         params = parse_query(query)
         csgo_items = get_csgo_item_listing(params['name'])

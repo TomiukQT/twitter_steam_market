@@ -53,7 +53,6 @@ class TwitterBot:
 
     def process_new_messages(self, messages: []):
         for message in messages:
-            print(message)
             sender_id, query = '', ''
 
             try:

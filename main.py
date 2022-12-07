@@ -6,7 +6,6 @@ import time
 
 
 def job(bot: TwitterBot):
-    ConsoleLogger().log("Doing job")
     messages = bot.scan_messages()
     bot.process_new_messages(messages)
 
