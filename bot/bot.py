@@ -12,7 +12,7 @@ class TwitterBot:
         self.client = self.auth()
 
     def set_last_message(self):
-        return int(open('last_message').read())
+        return int(open('bot/last_message').read())
 
     def auth(self) -> tweepy.Client:
         """
@@ -44,10 +44,10 @@ class TwitterBot:
             if re.fullmatch(r'^\d+ .+', str(msg)) is not None:
                 new_messages.append(str(msg))
 
-        else:
-            self.last_msg_id = msg.id
-            with open('last_message', 'w') as file:
-                file.write(self.last_msg_id)
+        if len(new_messages) > 0:
+            self.last_msg_id = messages[0].id
+            with open('bot/last_message', 'w') as file:
+                file.write(str(self.last_msg_id))
 
         return new_messages
 
@@ -89,13 +89,3 @@ class TwitterBot:
         sender_id = message.split(' ')[0]
         query = message.replace(sender_id, '').strip()
         return sender_id, query
-
-
-def main():
-    bot = TwitterBot()
-    messages = bot.scan_messages()
-    bot.process_new_messages(messages)
-
-
-if __name__ == '__main__':
-    main()

@@ -7,10 +7,9 @@ from common import get_nested
 from tqdm import tqdm
 import time
 
-try:
-    from .csgo_item import CSGOItem  # "myapp" case
-except:
-    from csgo_item import CSGOItem  # "__main__" case
+
+from .csgo_item import CSGOItem  # "myapp" case
+
 
 curAbbrev = {
     'USD': 1,

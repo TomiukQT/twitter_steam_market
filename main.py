@@ -1,16 +1,24 @@
-import steam_market.steam_market as sm
+from bot.bot import TwitterBot
+from my_logger.logger import ConsoleLogger
 
-TEST_ITEM = 'AK-47 | Redline (Field-Tested)'
-TEST_ITEM2 = 'AK-47 | The Empress (Field-Tested)'
+import schedule
+import time
+
+
+def job(bot: TwitterBot):
+    ConsoleLogger().log("Doing job")
+    messages = bot.scan_messages()
+    bot.process_new_messages(messages)
 
 
 def main():
-    csgo_items = sm.get_csgo_item_listing(TEST_ITEM2)
-    for item in csgo_items.values():
-        print(item)
-        break
+    bot = TwitterBot()
+    schedule.every(2).minutes.do(job, bot=bot)
+
+    while True:
+        schedule.run_pending()
+        time.sleep(1)
 
 
 if __name__ == '__main__':
     main()
-

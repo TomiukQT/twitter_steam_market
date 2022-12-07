@@ -3,14 +3,13 @@ from datetime import datetime
 
 class Logger:
     def log(self, message: str) -> str:
-        dt = datetime.now()
-        return str(dt).join(f'| {message}')
+        dt = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+        return f'{str(dt)} | {message}'
 
 
 class ConsoleLogger(Logger):
-    @staticmethod
     def log(self, message: str) -> str:
-        message = Logger.log(message)
+        message = Logger.log(self, message)
         print(message)
         return message
 
@@ -20,7 +19,7 @@ class FileLogger(Logger):
         self.file_name = file_name
 
     def log(self, message: str) -> str:
-        message = Logger.log(message)
+        message = Logger.log(self, message)
         with open(self.file_name, 'a') as file:
             file.write(message)
         return message
