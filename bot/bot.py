@@ -35,7 +35,6 @@ class TwitterBot:
         Scan direct messages and make new query if new messages
         Returns:
             list of new messages
-        TODO: what if there are more than 100 messages??
         """
         messages = self.client.get_direct_message_events().data
         new_messages = []
@@ -47,6 +46,9 @@ class TwitterBot:
 
         else:
             self.last_msg_id = msg.id
+            with open('last_message', 'w') as file:
+                file.write(self.last_msg_id)
+
         return new_messages
 
     def process_new_messages(self, messages: []):
@@ -64,8 +66,8 @@ class TwitterBot:
                 items = steam_market.send_query(query)
                 if len(items) == 0:
                     pass
-                    #self.client.create_direct_message(participant_id=sender_id,
-                                                      #text='Query returned 0 items')
+                    self.client.create_direct_message(participant_id=sender_id,
+                                                      text='Query returned 0 items')
                 else:
                     self.client.create_direct_message(participant_id=sender_id,
                                                       text=f'Query returned {len(items)} items. First is {list(items)[0]}')
@@ -73,12 +75,6 @@ class TwitterBot:
             except AttributeError:
                 print('Temp Wrong')
                 #self.client.create_direct_message(participant_id=sender_id, text='Wrong query or bot is temporarely banned on SteamAPI')
-
-
-
-
-
-
 
     @staticmethod
     def parse_message(message: str) -> Tuple[str, str]:
@@ -99,9 +95,6 @@ def main():
     bot = TwitterBot()
     messages = bot.scan_messages()
     bot.process_new_messages(messages)
-
-
-    #client.create_direct_message(participant_id='4078139543', text="Ahoj y bota")
 
 
 if __name__ == '__main__':
