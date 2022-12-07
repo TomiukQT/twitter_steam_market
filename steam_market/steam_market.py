@@ -5,6 +5,7 @@ import os
 
 from common import get_nested
 from tqdm import tqdm
+import time
 
 try:
     from .csgo_item import CSGOItem  # "myapp" case
@@ -78,39 +79,31 @@ def get_csgo_item_listing(name: str, currency: str = 'EUR') -> []:
         # https://api.csgofloat.com/?m=3136147247424375927&a=19190892996&d=9387202219111148413
         """
     url = f'https://steamcommunity.com/market/listings/730/{name}/render/'
-    item_listing = requests.get(url, params={
-        'query': '',
+    params = {'query': '',
         'start': '0',
         'count': '100',
         'country': 'US',
         'language': 'english',
         'currency': curAbbrev[currency],
-        'filter': '',
-    })
-    print(name)
-    print(item_listing.url)
-    item_listing_json = item_listing.json()
-    item_listing_json.pop('results_html')
-    item_listing_json.pop('hovers')
-    item_listing_json.pop('currency')
-    item_listing_json.pop('app_data')
+        'filter': ''}
 
     csgo_items = {}
-
-    inspect_links = {}
-    assets = get_nested(item_listing_json, 'assets', '730', '2')
-    for key in assets.keys():
-        item_info = assets[key]
-        inspect_links[key] = get_nested(item_info, 'actions', 0, 'link')
-
-    listing_info = item_listing_json['listinginfo']
-    for key in tqdm(listing_info.keys(), desc='Getting float from items'):
-        asset_id = listing_info[key]['asset']['id']
-        price = (listing_info[key]['converted_price'] + listing_info[key]['converted_fee']) / 100
-        inspect_link = get_nested(listing_info, key, 'asset', 'market_actions', 0, 'link')
-        print(inspect_link)
-        csgo_items[key] = CSGOItem(name, key, asset_id, price)
-        csgo_items[key].get_float(inspect_link)
+    first = True
+    while True:
+        if not first:
+            params['start'] = str(int(params['start']) + 100)
+            time.sleep(5)
+        item_listing = requests.get(url, params=params)
+        if not item_listing:
+            break
+        listing_info = item_listing.json()['listinginfo']
+        for key in tqdm(listing_info.keys(), desc='Getting items'):
+            asset_id = listing_info[key]['asset']['id']
+            price = (listing_info[key]['converted_price'] + listing_info[key]['converted_fee']) / 100
+            inspect_link = get_nested(listing_info, key, 'asset', 'market_actions', 0, 'link')
+            csgo_items[key] = CSGOItem(name, key, asset_id, price)
+            csgo_items[key].get_float(inspect_link)
+        first = False
 
     return csgo_items
 
@@ -147,11 +140,11 @@ def send_query(query: str) -> []:
                     csgo_items.pop(item_id)
                     continue
         return csgo_items.values()
-    except NameError:
-        print('NameErr')
+    except NameError as e:
+        print(e)
         return []
-    except Exception:
-        print('Ex')
+    except Exception as e:
+        print(e)
         return []
 
 
@@ -171,7 +164,7 @@ def parse_query(query: str) -> {}:
         'name': '',
         'float': (0, 1),
         'stickers': [],
-        'stickers_count': (0, 1)
+        'stickers_count': (0, 4)
     }
     matches = re.findall(r'([a-z_]+){([a-zA-Z0-9,_ ()|.-]+)}', query)
     for match in matches:
