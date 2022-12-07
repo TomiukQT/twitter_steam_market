@@ -12,7 +12,7 @@ class TwitterBot:
         self.client = self.auth()
 
     def set_last_message(self):
-        return int(open('bot/last_message').read())
+        return int(os.environ["TB_LAST_MSG_ID"])
 
     def auth(self) -> tweepy.Client:
         """
@@ -46,8 +46,7 @@ class TwitterBot:
 
         if len(new_messages) > 0:
             self.last_msg_id = messages[0].id
-            with open('bot/last_message', 'w') as file:
-                file.write(str(self.last_msg_id))
+            os.environ["TB_LAST_MSG_ID"] = str(messages[0].id)
 
         return new_messages
 

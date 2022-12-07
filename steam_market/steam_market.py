@@ -88,7 +88,7 @@ def get_csgo_item_listing(name: str, currency: str = 'EUR') -> []:
     csgo_items = {}
     first = True
     while True:
-        time.sleep(12)
+        time.sleep(20)
         if not first:
             params['start'] = str(int(params['start']) + 100)
         item_listing = requests.get(url, params=params)
