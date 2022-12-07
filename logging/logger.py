@@ -8,6 +8,7 @@ class Logger:
 
 
 class ConsoleLogger(Logger):
+    @staticmethod
     def log(self, message: str) -> str:
         message = Logger.log(message)
         print(message)
