@@ -12,7 +12,7 @@ class TwitterBot:
         self.client = self.auth()
 
     def set_last_message(self):
-        return int(os.environ["TB_LAST_MSG_ID"])
+        return int(os.getenv("TB_LAST_MSG_ID"))
 
     def auth(self) -> tweepy.Client:
         """
