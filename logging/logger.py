@@ -4,7 +4,7 @@ from datetime import datetime
 class Logger:
     def log(self, message: str) -> str:
         dt = datetime.now()
-        return str(dt).join(f'{message}')
+        return str(dt).join(f'| {message}')
 
 
 class ConsoleLogger(Logger):
