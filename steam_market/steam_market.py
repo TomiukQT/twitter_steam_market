@@ -58,7 +58,11 @@ def get_csgo_item_listing(name: str, currency: str = 'EUR') -> []:
         if item_listing is None or item_listing is []:
             break
         try:
-            listing_info = item_listing.json()['listinginfo']
+            listing_info = item_listing.json()
+            if listing_info is not None:
+                listing_info = listing_info['listinginfo']
+            if type(listing_info) is not dict:
+                break
             for key in listing_info.keys():
                 asset_id = listing_info[key]['asset']['id']
                 price = (listing_info[key]['converted_price'] + listing_info[key]['converted_fee']) / 100
@@ -66,7 +70,8 @@ def get_csgo_item_listing(name: str, currency: str = 'EUR') -> []:
                 csgo_items[key] = CSGOItem(name, key, asset_id, price)
                 csgo_items[key].get_float(inspect_link)
         except Exception as e:
-            print(f'Error at send getting csgo item listing: {e}')
+            print(f'Error at  getting csgo item listing: {e}')
+            continue
         first = False
 
     return csgo_items
