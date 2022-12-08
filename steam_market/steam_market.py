@@ -1,14 +1,10 @@
 import re
-
 import requests
-import os
 
 from common import get_nested
 import time
 
-
 from .csgo_item import CSGOItem  # "myapp" case
-
 
 curAbbrev = {
     'USD': 1,
@@ -21,39 +17,6 @@ curAbbrev = {
 }
 
 
-def get_item(appid, name, currency='EUR'):
-    r"""
-    Function from: https://github.com/MatyiFKBT/PySteamMarket
-    Gets item listings from the `Steam Marketplace`.
-    @appid ID of game item belongs to.
-    @name: Name of item to lookup.
-
-    @currency: Abbreviation of currency to return listing prices in.
-    Accepted currencies:`USD,GBP,EUR,CHF,RUB,KRW,CAD`
-
-    Defaults to `EUR`.
-    Please lookup the proper abbreviation for your currency of choice.
-
-    Returns a json object
-    Example:
-    ```
-    {
-        "success": true,
-        "lowest_price": "0,92€",
-        "volume": "15",
-        "median_price": "0,80€"
-    }
-    ```
-    """
-    url = 'https://steamcommunity.com//market/priceoverview'
-    market_item = requests.get(url, params={
-        'appid': appid,
-        'market_hash_name': name,
-        'currency': curAbbrev[currency]
-    })
-    return market_item.json()
-
-
 def get_csgo_item_listing(name: str, currency: str = 'EUR') -> []:
     r"""
         Function inspired fom: https://github.com/MatyiFKBT/PySteamMarket
@@ -64,7 +27,7 @@ def get_csgo_item_listing(name: str, currency: str = 'EUR') -> []:
         Accepted currencies:`USD,GBP,EUR,CHF,RUB,KRW,CAD`
 
         Defaults to `EUR`.
-        Please lookup the proper abbreviation for your currency of choice.
+        Please look up the proper abbreviation for your currency of choice.
 
         Returns a json object
         Example:
@@ -78,12 +41,12 @@ def get_csgo_item_listing(name: str, currency: str = 'EUR') -> []:
         """
     url = f'https://steamcommunity.com/market/listings/730/{name}/render/'
     params = {'query': '',
-        'start': '0',
-        'count': '100',
-        'country': 'US',
-        'language': 'english',
-        'currency': curAbbrev[currency],
-        'filter': ''}
+              'start': '0',
+              'count': '100',
+              'country': 'US',
+              'language': 'english',
+              'currency': curAbbrev[currency],
+              'filter': ''}
 
     csgo_items = {}
     first = True
@@ -94,13 +57,16 @@ def get_csgo_item_listing(name: str, currency: str = 'EUR') -> []:
         item_listing = requests.get(url, params=params)
         if item_listing is None or item_listing is []:
             break
-        listing_info = item_listing.json()['listinginfo']
-        for key in listing_info.keys():
-            asset_id = listing_info[key]['asset']['id']
-            price = (listing_info[key]['converted_price'] + listing_info[key]['converted_fee']) / 100
-            inspect_link = get_nested(listing_info, key, 'asset', 'market_actions', 0, 'link')
-            csgo_items[key] = CSGOItem(name, key, asset_id, price)
-            csgo_items[key].get_float(inspect_link)
+        try:
+            listing_info = item_listing.json()['listinginfo']
+            for key in listing_info.keys():
+                asset_id = listing_info[key]['asset']['id']
+                price = (listing_info[key]['converted_price'] + listing_info[key]['converted_fee']) / 100
+                inspect_link = get_nested(listing_info, key, 'asset', 'market_actions', 0, 'link')
+                csgo_items[key] = CSGOItem(name, key, asset_id, price)
+                csgo_items[key].get_float(inspect_link)
+        except Exception as e:
+            print(e)
         first = False
 
     return csgo_items
@@ -163,15 +129,19 @@ def parse_query(query: str) -> {}:
         'stickers': [],
         'stickers_count': (0, 4)
     }
-    matches = re.findall(r'([a-z_]+){([a-zA-Z0-9,_ ()|.-]+)}', query)
-    for match in matches:
-        key, value = match[0], match[1]
-        if key not in params.keys():
-            print(f'Unknown param {key}')
-            continue
-        params[key] = parse_param(key, value)
+    try:
+        matches = re.findall(r'([a-z_]+){([a-zA-Z0-9,_ ()|.-]+)}', query)
+        for match in matches:
+            key, value = match[0], match[1]
+            if key not in params.keys():
+                print(f'Unknown param {key}')
+                continue
+            params[key] = parse_param(key, value)
+    except Exception as e:
+        print(e)
+        raise e
     if params['name'] == '':
-        raise NameError('Name is missing') #TODO Change exception
+        raise NameError('Name is missing')  # TODO Change exception
     return params
 
 

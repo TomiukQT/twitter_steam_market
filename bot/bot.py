@@ -37,6 +37,8 @@ class TwitterBot:
             list of new messages
         """
         messages = self.client.get_direct_message_events().data
+        if messages is None:
+            return []
         new_messages = []
         for msg in messages:
             if msg.id == self.last_msg_id:
@@ -86,6 +88,9 @@ class TwitterBot:
         Returns: id of sender and query
 
         """
-        sender_id = message.split(' ')[0]
-        query = message.replace(sender_id, '').strip()
+        try:
+            sender_id = message.split(' ')[0]
+            query = message.replace(sender_id, '').strip()
+        except Exception as e:
+            print(e)
         return sender_id, query
