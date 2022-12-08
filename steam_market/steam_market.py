@@ -92,7 +92,7 @@ def get_csgo_item_listing(name: str, currency: str = 'EUR') -> []:
         if not first:
             params['start'] = str(int(params['start']) + 100)
         item_listing = requests.get(url, params=params)
-        if not item_listing:
+        if item_listing is None or item_listing is []:
             break
         listing_info = item_listing.json()['listinginfo']
         for key in listing_info.keys():
