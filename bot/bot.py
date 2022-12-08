@@ -33,20 +33,23 @@ class TwitterBot:
         Returns:
             list of new messages
         """
-        messages = self.client.get_direct_message_events().data
-        if messages is None or len(messages) <= 0:
-            return []
         new_messages = []
-        for msg in messages:
-            if msg.id == self.last_msg_id:
-                break
-            if re.fullmatch(r'^\d+ .+', str(msg)) is not None:
-                new_messages.append(str(msg))
+        try:
+            messages = self.client.get_direct_message_events().data
+            if messages is None or len(messages) <= 0:
+                return []
 
-        if len(new_messages) > 0:
-            self.last_msg_id = messages[0].id
-            os.environ["TB_LAST_MSG_ID"] = str(messages[0].id)
+            for msg in messages:
+                if msg.id == self.last_msg_id:
+                    break
+                if re.fullmatch(r'^\d+ .+', str(msg)) is not None:
+                    new_messages.append(str(msg))
 
+            if len(new_messages) > 0:
+                self.last_msg_id = messages[0].id
+                os.environ["TB_LAST_MSG_ID"] = str(messages[0].id)
+        except Exception as e:
+            print(f'Error at scanning messages: {e}')
         return new_messages
 
     def process_new_messages(self, messages: []):
@@ -56,7 +59,7 @@ class TwitterBot:
             sender_id, query = '', ''
 
             try:
-               sender_id, query = self.parse_message(message)
+                sender_id, query = self.parse_message(message)
             except AttributeError:
                 print(f'Message {message} wasnt parsed')
                 continue
@@ -70,8 +73,9 @@ class TwitterBot:
                 else:
                     self.client.create_direct_message(participant_id=sender_id,
                                                       text=f'Query returned {len(items)} items. First is {list(items)[0]}')
-            except AttributeError:
-                print('Temp Wrong')
+            except Exception as e:
+                print(f'Error at processing new messages {e}')
+
                 #self.client.create_direct_message(participant_id=sender_id, text='Wrong query or bot is temporarely banned on SteamAPI')
 
     @staticmethod
@@ -84,6 +88,8 @@ class TwitterBot:
         Returns: id of sender and query
 
         """
+        if re.match(r'[0-9]+ name{[a-zA-Z0-9,_ ()|.-]+}', message) is None:
+            raise AttributeError(f'Bad message: {message}')
         try:
             sender_id = message.split(' ')[0]
             query = message.replace(sender_id, '').strip()
