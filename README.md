@@ -1,6 +1,9 @@
 # twitter_steam_market
 Twitter bot with steam market integration. You can send query in PM to bot and it returns count of items which match the query.
 
+
+## CURRENTLY WIP, MIGHT NOT WORK CORRECTLY
+
 # How to use:
 Account of bot: https://twitter.com/CSGO_Market_Bot
 Just send PM to bot on twitter with your query.
@@ -18,8 +21,12 @@ Becaused of free twitter API, bot cant get your twitter ID, so you have to send 
 
 Example: 414512641724516276 name{AK 47 | Redline (Field-Tested)} float{0.15,0.25}  stickers_count={1,4}
 
+## Example
+
+![Example](example.PNG "Example")
+
 ## TBD
-price{PRICE}
-skin without quality
-stickers{NAME or NAME_REGEX}
-pattern{PATTERN}
+- price{PRICE}
+- skin without quality
+- stickers{NAME or NAME_REGEX}
+- pattern{PATTERN}
