@@ -66,7 +66,7 @@ class TwitterBot:
                 if len(items) == 0:
                     pass
                     self.client.create_direct_message(participant_id=sender_id,
-                                                      text='Query returned 0 items')
+                                                      text=f'Query "{query}" returned 0 items')
                 else:
                     self.client.create_direct_message(participant_id=sender_id,
                                                       text=f'Query returned {len(items)} items. First is {list(items)[0]}')
