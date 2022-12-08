@@ -51,6 +51,8 @@ class TwitterBot:
         return new_messages
 
     def process_new_messages(self, messages: []):
+        if messages is None or len(messages) == 0:
+            return
         for message in messages:
             sender_id, query = '', ''
 
