@@ -8,11 +8,8 @@ import time
 
 class TwitterBot:
     def __init__(self) -> None:
-        self.last_msg_id = self.set_last_message()
+        self.last_msg_id = int(os.getenv("TB_LAST_MSG_ID"))
         self.client = self.auth()
-
-    def set_last_message(self):
-        return int(os.getenv("TB_LAST_MSG_ID"))
 
     def auth(self) -> tweepy.Client:
         """
@@ -37,7 +34,7 @@ class TwitterBot:
             list of new messages
         """
         messages = self.client.get_direct_message_events().data
-        if messages is None:
+        if messages is None or len(messages) <= 0:
             return []
         new_messages = []
         for msg in messages:
@@ -73,7 +70,6 @@ class TwitterBot:
                 else:
                     self.client.create_direct_message(participant_id=sender_id,
                                                       text=f'Query returned {len(items)} items. First is {list(items)[0]}')
-                time.sleep(5)
             except AttributeError:
                 print('Temp Wrong')
                 #self.client.create_direct_message(participant_id=sender_id, text='Wrong query or bot is temporarely banned on SteamAPI')
@@ -92,5 +88,5 @@ class TwitterBot:
             sender_id = message.split(' ')[0]
             query = message.replace(sender_id, '').strip()
         except Exception as e:
-            print(e)
+            print(f'Error at bot parsing message: {e}')
         return sender_id, query

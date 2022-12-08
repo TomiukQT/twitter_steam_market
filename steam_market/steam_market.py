@@ -66,7 +66,7 @@ def get_csgo_item_listing(name: str, currency: str = 'EUR') -> []:
                 csgo_items[key] = CSGOItem(name, key, asset_id, price)
                 csgo_items[key].get_float(inspect_link)
         except Exception as e:
-            print(e)
+            print(f'Error at send getting csgo item listing: {e}')
         first = False
 
     return csgo_items
@@ -104,10 +104,10 @@ def send_query(query: str) -> []:
                     continue
         return csgo_items.values()
     except NameError as e:
-        print(e)
+        print(f'Error at send query NameError: {e}')
         return []
     except Exception as e:
-        print(e)
+        print(f'Error at send query: {e}')
         return []
 
 
@@ -138,7 +138,7 @@ def parse_query(query: str) -> {}:
                 continue
             params[key] = parse_param(key, value)
     except Exception as e:
-        print(e)
+        print(f'Error at bot parsing query: {e}')
         raise e
     if params['name'] == '':
         raise NameError('Name is missing')  # TODO Change exception
